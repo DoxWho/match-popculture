@@ -24,6 +24,11 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
         }
         
+        .card-front {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid #334155;
+        }
+
         .card-back { 
             transform: rotateY(180deg); 
             border: 4px solid white; 
@@ -62,6 +67,17 @@
             background-color: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(4px);
         }
+
+        /* Custom Logo Style */
+        .logo-mark {
+            font-family: ui-sans-serif, system-ui;
+            background: linear-gradient(to bottom right, #60a5fa, #f87171);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: -0.05em;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen flex flex-col items-center p-4">
@@ -70,7 +86,7 @@
     <div id="setup-screen" class="fixed inset-0 bg-slate-900 z-40 flex items-center justify-center p-4">
         <div class="bg-slate-800 p-8 rounded-3xl max-w-xl w-full shadow-2xl border border-slate-700 relative">
             <!-- Settings Toggle -->
-            <button id="open-settings" class="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
+            <button id="open-settings-setup" class="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -123,7 +139,7 @@
                 </div>
             </div>
 
-            <div class="max-h-[50vh] overflow-y-auto rounded-xl border border-slate-700 bg-slate-900/50 mb-6">
+            <div class="max-h-[40vh] overflow-y-auto rounded-xl border border-slate-700 bg-slate-900/50 mb-6">
                 <table class="w-full text-left">
                     <thead class="sticky top-0 bg-slate-800 text-[10px] uppercase font-black text-slate-400">
                         <tr>
@@ -135,9 +151,18 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button id="modal-audit-btn" class="flex items-center justify-center gap-2 bg-yellow-600/20 text-yellow-500 border border-yellow-600/30 font-black py-3 rounded-xl uppercase tracking-widest text-xs hover:bg-yellow-600/30">
+                    ⚡ Peek (Audit Mode)
+                </button>
+                <button id="reset-game-btn" class="flex items-center justify-center gap-2 bg-red-600/20 text-red-500 border border-red-600/30 font-black py-3 rounded-xl uppercase tracking-widest text-xs hover:bg-red-600/30">
+                    🔄 Reset & Shuffle
+                </button>
+            </div>
             
             <button id="save-settings" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl uppercase tracking-widest text-sm">
-                Save & Close
+                Save & Apply Changes
             </button>
         </div>
     </div>
@@ -152,19 +177,23 @@
     </div>
 
     <!-- Main Game UI -->
-    <div class="w-full max-w-5xl flex flex-col md:flex-row justify-between items-center mb-8 gap-6 mt-4">
+    <div class="w-full max-w-5xl flex flex-col md:flex-row justify-between items-center mb-8 gap-6 mt-4 relative">
         <div id="t1-ui" class="flex-1 w-full p-6 rounded-3xl bg-slate-900 transition-all duration-500 border-4 border-transparent text-center">
             <h2 id="t1-display-name" class="text-xs uppercase tracking-[0.2em] font-black opacity-50 mb-2">Team 1</h2>
             <p class="text-6xl font-black" id="score1">0</p>
         </div>
         
-        <div class="text-center px-4 shrink-0">
-            <h1 class="text-4xl font-black tracking-tighter uppercase italic leading-none mb-2">Culture Quest</h1>
-            <div class="h-1 w-24 bg-gradient-to-r from-blue-500 to-red-500 mx-auto mb-4 rounded-full"></div>
+        <div class="text-center px-4 shrink-0 flex flex-col items-center">
+            <div class="flex items-center gap-3">
+                <h1 class="text-4xl font-black tracking-tighter uppercase italic leading-none">Culture Quest</h1>
+                <button id="open-settings-game" class="text-slate-500 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            <div class="h-1 w-24 bg-gradient-to-r from-blue-500 to-red-500 mx-auto my-4 rounded-full"></div>
             <p id="turn-msg" class="font-black text-sm uppercase tracking-[0.3em] h-5"></p>
-            <button id="audit-btn" class="mt-4 px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-black text-[10px] font-black uppercase tracking-widest rounded-full transition-all hidden shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                ⚡ Full Audit Mode
-            </button>
         </div>
 
         <div id="t2-ui" class="flex-1 w-full p-6 rounded-3xl bg-slate-900 transition-all duration-500 border-4 border-transparent text-center">
@@ -208,6 +237,7 @@
         let currentTeam = 1;
         let lockBoard = false;
         let teamConfigs = { 1: {}, 2: {} };
+        let lastProcessedData = [];
         const auditColors = ['#f87171', '#fb923c', '#fbbf24', '#a3e635', '#4ade80', '#2dd4bf', '#22d3ee', '#60a5fa', '#818cf8', '#a78bfa', '#e879f9', '#f472b6'];
 
         const tableBody = document.getElementById('config-table-body');
@@ -230,15 +260,27 @@
         renderTable(savedData ? JSON.parse(savedData) : defaultItems);
 
         // Settings Modal Controls
-        document.getElementById('open-settings').addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        document.getElementById('open-settings-setup').addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        document.getElementById('open-settings-game').addEventListener('click', () => settingsModal.classList.remove('hidden'));
         document.getElementById('close-settings').addEventListener('click', () => settingsModal.classList.add('hidden'));
-        document.getElementById('save-settings').addEventListener('click', () => {
+        
+        document.getElementById('save-settings').addEventListener('click', async () => {
             const currentItems = Array.from(document.querySelectorAll('#config-table-body tr')).map(row => ({
                 name: row.querySelector('.name-input').value,
                 prompt: row.querySelector('.prompt-input').value
             }));
             localStorage.setItem('culture_quest_config', JSON.stringify(currentItems));
+            
+            // If game is active, we might need to re-fetch/re-gen if things changed significantly
+            // For now, let's just close and assume user resets if they want fresh cards
             settingsModal.classList.add('hidden');
+            
+            // If the game board exists, it's safer to re-process if names changed
+            if (document.getElementById('setup-screen').style.display === 'none') {
+                activeItems = currentItems.map((it, i) => ({ id: `item-${i}`, name: it.name, input: it.prompt.trim() }));
+                document.getElementById('loading').classList.remove('hidden');
+                await processAssets();
+            }
         });
 
         // Export Logic
@@ -270,6 +312,24 @@
                 } catch (err) { console.error("Invalid JSON"); }
             };
             reader.readAsText(file);
+        });
+
+        // Reset Game Feature
+        document.getElementById('reset-game-btn').addEventListener('click', () => {
+            if (confirm("Reset scores and shuffle all cards?")) {
+                scores = { 1: 0, 2: 0 };
+                currentTeam = 1;
+                flipped = [];
+                lockBoard = false;
+                setupBoard(lastProcessedData);
+                settingsModal.classList.add('hidden');
+            }
+        });
+
+        // Audit Mode moved to Modal
+        document.getElementById('modal-audit-btn').addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+            triggerAudit();
         });
 
         document.getElementById('start-btn').addEventListener('click', () => {
@@ -313,9 +373,9 @@
                     finalData.push({ ...item, image: `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${item.name}` });
                 }
             }
+            lastProcessedData = finalData;
             setupBoard(finalData);
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('audit-btn').classList.remove('hidden');
+            document.getElementById('loading').classList.add('hidden');
         }
 
         function setupBoard(data) {
@@ -333,7 +393,9 @@
                 container.className = 'perspective h-32 sm:h-40 relative card-container';
                 container.innerHTML = `
                     <div class="card-inner w-full h-full relative" data-match="${card.matchId}">
-                        <div class="card-front bg-slate-800 border-2 border-slate-700 text-3xl font-black text-slate-700 select-none">?</div>
+                        <div class="card-front select-none">
+                            <span class="logo-mark text-4xl">CQ</span>
+                        </div>
                         <div class="card-back overflow-hidden select-none border-4 border-white bg-white">
                             ${card.type === 'image' 
                                 ? `<img src="${card.value}" class="w-full h-full object-cover pointer-events-none" onerror="this.src='https://placehold.co/400x400?text=Broken+Link'">`
@@ -348,7 +410,7 @@
             updateUI();
         }
 
-        document.getElementById('audit-btn').addEventListener('click', () => {
+        function triggerAudit() {
             if (lockBoard) return;
             document.querySelectorAll('.card-container').forEach(c => {
                 const inner = c.querySelector('.card-inner');
@@ -368,7 +430,7 @@
                     }
                 });
             }, 5000);
-        });
+        }
 
         function handleFlip(container) {
             const inner = container.querySelector('.card-inner');
